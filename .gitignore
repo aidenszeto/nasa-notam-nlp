@@ -1,0 +1,10 @@
+GoogleNews-vectors-negative300.bin
+Urgency-Model-With-FastText-and-RNN.ipynb
+wiki-news-300d-1M.vec
+ecommerceDataset.csv
+.ipynb_checkpoints
+glove/*
+!glove/glove_lstm.ipynb
+fasttext/*
+fasttext/fasttext_lstm.ipynb
+.DS_Store
