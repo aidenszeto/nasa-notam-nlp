@@ -6,5 +6,5 @@ ecommerceDataset.csv
 glove/*
 !glove/glove_lstm.ipynb
 fasttext/*
-fasttext/fasttext_lstm.ipynb
+!fasttext/fasttext_lstm.ipynb
 .DS_Store
