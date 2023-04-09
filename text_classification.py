@@ -6,7 +6,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from tensorflow.keras.models import load_model
 from keras_preprocessing.sequence import pad_sequences
-from transformers import BertForSequenceClassification
+from transformers import BertForSequenceClassification, TextClassificationPipeline
 import numpy as np
 import argparse
 import re
@@ -45,21 +45,25 @@ def predict(text, context, model_type):
     if model_type != "glove" and model_type != "word2vec" and model_type != "fasttext" and model_type != "bert":
         return "ERROR: Model is invalid. Please choose 'glove', 'word2vec', 'fasttext', or 'bert'."
     
-    if model_type == "bert":
-        model = BertForSequenceClassification.from_pretrained(f"{model_type}/{context}_model")
-    else:
-        model = load_model(f"{model_type}/{context}_model")
-    words = get_normalized_words(text)
-
     with open(f"{model_type}/{context}_tokenizer.pickle", "rb") as handle:
         tokenizer = pickle.load(handle)
-
-    padded_sequences = tokenize_and_pad(tokenizer, words, MAX_LENGTHS[context])
-    probabilities = model.predict(padded_sequences, verbose=0)
-    prediction = np.argmax(probabilities)
+        
+    if model_type == "bert":
+        model = BertForSequenceClassification.from_pretrained(f"{model_type}/{context}_model")
+        pipe = TextClassificationPipeline(model=model, tokenizer=tokenizer)
+        probabilities = sorted(pipe(text, top_k=None), key=lambda d: d["label"])
+        prediction = np.argmax([x["score"] for x in probabilities])
+        score = probabilities[prediction]["score"]
+    else:
+        model = load_model(f"{model_type}/{context}_model")
+        words = get_normalized_words(text)
+        padded_sequences = tokenize_and_pad(tokenizer, words, MAX_LENGTHS[context])
+        probabilities = model.predict(padded_sequences, verbose=0)
+        prediction = np.argmax(probabilities)
+        score = probabilities[0][prediction]
+    
     encoding = ENCODINGS[context]
-
-    return f"{encoding[prediction]} with probability {probabilities[0][prediction] * 100}%"
+    return f"{encoding[prediction]} with probability {score*100}%"
 
 
 def main():
