@@ -6,6 +6,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from tensorflow.keras.models import load_model
 from keras_preprocessing.sequence import pad_sequences
+from transformers import BertForSequenceClassification
 import numpy as np
 import argparse
 import re
@@ -41,8 +42,13 @@ def predict(text, context, model_type):
     model_type = model_type.lower()
     if context != "ecommerce" and context != "tweet" and context != "drf":
         return "ERROR: Context is invalid. Please choose 'ecommerce', 'tweet', or 'drf'."
+    if model_type != "glove" and model_type != "word2vec" and model_type != "fasttext" and model_type != "bert":
+        return "ERROR: Model is invalid. Please choose 'glove', 'word2vec', 'fasttext', or 'bert'."
     
-    model = load_model(f"{model_type}/{context}_model")
+    if model_type == "bert":
+        model = BertForSequenceClassification.from_pretrained(f"{model_type}/{context}_model")
+    else:
+        model = load_model(f"{model_type}/{context}_model")
     words = get_normalized_words(text)
 
     with open(f"{model_type}/{context}_tokenizer.pickle", "rb") as handle:
