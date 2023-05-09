@@ -11,3 +11,8 @@ word2vec/
 fasttext/
 bert/
 output/
+notam/model/
+notam/model_word2vec/
+notam/tokenizer.pickle
+notam/tmp_trainer/
+notam/output/
